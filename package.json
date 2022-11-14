@@ -12,6 +12,7 @@
   "devDependencies": {},
   "dependencies": {
     "@_sh/strapi-plugin-ckeditor": "^1.1.2",
+    "@strapi/plugin-documentation": "^4.5.0",
     "@strapi/plugin-i18n": "4.5.0",
     "@strapi/plugin-users-permissions": "4.5.0",
     "@strapi/strapi": "4.5.0",
