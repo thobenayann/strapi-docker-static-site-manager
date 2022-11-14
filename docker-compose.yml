@@ -1,0 +1,69 @@
+# So to explain what all this is.
+# version - Using version 3 of docker-compose
+# We are defining two services strapi and strapiDB
+version: "3"
+services:
+  # strapi - this is the name of the service we defined
+  strapi:
+    # contaier_name - The term of the docker container you can call this whatever you want.
+    container_name: strapi
+    # build - Telling strapi to build the image using our project folder.
+    # (Since this is in the root .) it will use our strapi project.
+    build: .
+    # image - The name of the image we want to build
+    image: mystrapi:latest
+    # env_file providing a .env with environmental variables we want to keep secret 🤫
+    env_file: .env
+    # environment - Here we are defining all the variables we want to use.
+    # ${THISISOURNAME} is what we have in the .env and will be the placeholder
+    environment:
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: strapiDB
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PORT: ${DATABASE_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      NODE_ENV: ${NODE_ENV}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      - ./.env:/opt/app/.env
+    ports:
+      - "1337:1337"
+    # networks - We are setting up a docker network so our containers can talk together,
+    # this can also replace link -depends_on
+    networks:
+      - strapi
+    # we need the mysqlDB container to run first.
+    depends_on:
+      - strapiDB
+
+  strapiDB: 
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    platform: linux/amd64 #for platform error on Apple M1 chips
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - '3306:3306'
+    volumes:
+      - strapi-data:/var/lib/mysql #using a volume
+      #- ./data:/var/lib/mysql # if you want to use a bind folder
+    networks:
+      - strapi
+
+volumes:
+    strapi-data:
+
+networks:
+  strapi:
+    name: Strapi
+    driver: bridge

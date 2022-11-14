@@ -1,0 +1,7 @@
+# This works like a .gitignore and will tell Docker 🐳 not to transfer ⛔️ these folders as we don't need them.
+.tmp/
+.cache/
+.git/
+build/
+node_modules/
+data/
